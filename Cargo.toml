@@ -1,0 +1,10 @@
+[package]
+name = "royal"
+description = "royal"
+readme = "README.md"
+repository = "https://github.com/emirsassan/royal"
+license = "GPL-3.0-or-later"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
