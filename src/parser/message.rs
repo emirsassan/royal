@@ -26,7 +26,7 @@ impl Message {
         }
 
         let header = Self::parse_header(parts[0])?;
-        
+
         let content_part = &parts[1..].join("]");
         let (content, flags) = Self::parse_content(content_part);
 
@@ -40,7 +40,7 @@ impl Message {
     fn parse_header(header: &str) -> Option<MessageHeader> {
         let header = header.trim_start_matches('[');
         let parts: Vec<&str> = header.split_whitespace().collect();
-        
+
         if parts.len() < 3 {
             return None;
         }
@@ -56,14 +56,15 @@ impl Message {
         };
         let box_type = match &parts[1][..3] {
             "HLP" => "Help",
-            "MSG" => "Message", 
+            "MSG" => "Message",
             "MND" => "Mind",
             "SYS" => "System",
             "TRV" => "Trivia",
             "DVL" => "Devil",
             "PFM" => "Progress",
             _ => "Unknown",
-        }.to_string();
+        }
+        .to_string();
         let message_id = parts[1].to_string();
 
         Some(MessageHeader {
