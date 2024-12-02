@@ -1,6 +1,6 @@
 #[derive(Debug)]
 pub struct MessageHeader {
-    pub box_type: String,
+    pub box_type: BoxType,
     pub message_id: String,
     pub character: Option<String>,
 }
@@ -16,6 +16,18 @@ pub struct Message {
     pub header: MessageHeader,
     pub content: String,
     pub flags: MessageFlags,
+}
+
+#[derive(Debug)]
+pub enum BoxType {
+    Help,
+    Message,
+    Mind,
+    System,
+    Trivia,
+    Devil,
+    Progress,
+    Unknown,
 }
 
 impl Message {
@@ -55,16 +67,15 @@ impl Message {
             None
         };
         let box_type = match &parts[1][..3] {
-            "HLP" => "Help",
-            "MSG" => "Message",
-            "MND" => "Mind",
-            "SYS" => "System",
-            "TRV" => "Trivia",
-            "DVL" => "Devil",
-            "PFM" => "Progress",
-            _ => "Unknown",
-        }
-        .to_string();
+            "HLP" => BoxType::Help,
+            "MSG" => BoxType::Message,
+            "MND" => BoxType::Mind,
+            "SYS" => BoxType::System,
+            "TRV" => BoxType::Trivia,
+            "DVL" => BoxType::Devil,
+            "PFM" => BoxType::Progress,
+            _ => BoxType::Unknown,
+        };
         let message_id = parts[1].to_string();
 
         Some(MessageHeader {

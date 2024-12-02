@@ -8,7 +8,7 @@ fn main() {
         if let Some(character) = message.header.character {
             println!("Character: {}", character);
         }
-        println!("Box Type: {}", message.header.box_type);
+        println!("Box Type: {:?}", message.header.box_type);
         println!("Content: {}", message.content);
         println!("Has lipsync: {}", message.flags.has_lipsync);
         println!("Waits for input: {}", message.flags.wait_for_input);
