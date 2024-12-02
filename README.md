@@ -15,7 +15,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-royal = "0.1.1"
+royal = "0.1.2"
 ```
 
 Example usage:
@@ -36,7 +36,7 @@ fn main() {
 ## Message Format
 
 The parser handles messages in the following format:
-- Header: `[msg MESSAGE_ID [CHARACTER]]`
+- Header: `[msg MESSAGE_TYPE_MESSAGE_ID [CHARACTER]]`
 - Content markers:
   - `[s]`: Start of message
   - `[f 4 10 65535 0 0]`: Lipsync marker
