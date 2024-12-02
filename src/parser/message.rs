@@ -16,6 +16,7 @@ pub struct Message {
     pub header: MessageHeader,
     pub content: String,
     pub flags: MessageFlags,
+    pub confidant_points: Option<ConfidantPoints>,
 }
 
 #[derive(Debug)]
@@ -30,6 +31,13 @@ pub enum BoxType {
     Unknown,
 }
 
+#[derive(Debug)]
+pub struct ConfidantPoints {
+    pub confidant_id: u8,
+    pub points: u8,
+    pub model_id: u16,
+}
+
 impl Message {
     pub fn parse(input: &str) -> Option<Message> {
         let parts: Vec<&str> = input.split(']').collect();
@@ -38,14 +46,14 @@ impl Message {
         }
 
         let header = Self::parse_header(parts[0])?;
-
         let content_part = &parts[1..].join("]");
-        let (content, flags) = Self::parse_content(content_part);
+        let (content, flags, confidant_points) = Self::parse_content(content_part);
 
         Some(Message {
             header,
             content,
             flags,
+            confidant_points,
         })
     }
 
@@ -85,7 +93,7 @@ impl Message {
         })
     }
 
-    fn parse_content(content: &str) -> (String, MessageFlags) {
+    fn parse_content(content: &str) -> (String, MessageFlags, Option<ConfidantPoints>) {
         let mut flags = MessageFlags {
             has_lipsync: false,
             wait_for_input: false,
@@ -93,6 +101,7 @@ impl Message {
 
         let mut message = String::new();
         let mut parts = content.split('[');
+        let mut confidant_points: Option<ConfidantPoints> = None;
 
         if let Some(first) = parts.next() {
             if first.starts_with(']') {
@@ -118,9 +127,37 @@ impl Message {
                 break;
             } else if !part.starts_with('f') {
                 message.push_str(part);
+            } else if part.starts_with("f 5 13 ") {
+                confidant_points = {
+                    let confidant_part = part.split(']').next().unwrap_or("");
+                    let parts: Vec<&str> = confidant_part["f 5 13 ".len()..].split_whitespace().collect();
+                    if parts.len() >= 3 {
+                        let model_id = parts[2].trim_end_matches(']');
+                        if let (Ok(confidant_id), Ok(points), Ok(model_id)) = (
+                            parts[0].parse::<u32>(),
+                            parts[1].parse::<u32>(),
+                            model_id.parse::<u32>()
+                        ) {
+                            Some(ConfidantPoints {
+                                confidant_id: confidant_id as u8,
+                                points: points as u8,
+                                model_id: model_id as u16,
+                            })
+                        } else {
+                            println!("Failed to parse confidant points numbers: {:?}", parts);
+                            None
+                        }
+                    } else {
+                        println!("Failed to parse confidant points: {:?}", parts);
+                        None
+                    }
+                };
+                if let Some(text) = part.split(']').nth(1) {
+                    message.push_str(text);
+                }
             }
         }
 
-        (message.trim().to_string(), flags)
+        (message.trim().to_string(), flags, confidant_points)
     }
 }

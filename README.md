@@ -15,7 +15,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-royal = "0.1.2"
+royal = "0.1.3"
 ```
 
 Example usage:
@@ -40,6 +40,7 @@ The parser handles messages in the following format:
 - Content markers:
   - `[s]`: Start of message
   - `[f 4 10 65535 0 0]`: Lipsync marker
+  - `[f 5 13 confidant_id points model_id]`: Confidant points parser
   - `[f 1 3 65535]`: Message end marker
   - `[w]`: Wait for input
   - `[e]`: End of message

@@ -12,6 +12,9 @@ fn main() {
         println!("Content: {}", message.content);
         println!("Has lipsync: {}", message.flags.has_lipsync);
         println!("Waits for input: {}", message.flags.wait_for_input);
+        if let Some(confidant_points) = message.confidant_points {
+            println!("Confidant Points: {:?}", confidant_points);
+        }
     } else {
         println!("Failed to parse message");
     }
