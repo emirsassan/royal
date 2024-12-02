@@ -1,10 +1,13 @@
 [package]
 name = "royal"
-description = "royal"
+version = "0.1.1"
+edition = "2021"
+description = "A parser for game dialogue message formats"
+authors = ["emirsassan"]
+license = "GPL-3.0-or-later"
 readme = "README.md"
 repository = "https://github.com/emirsassan/royal"
-license = "GPL-3.0-or-later"
-version = "0.1.0"
-edition = "2021"
+keywords = ["parser", "game", "dialogue"]
+categories = ["parser-implementations", "game-development"]
 
 [dependencies]
