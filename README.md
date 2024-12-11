@@ -1,6 +1,6 @@
 # Royal
 
-A Rust library for parsing game dialogue message formats.
+A Rust library for parsing Persona 5 Royal dialogue message format.
 
 ## Features
 
@@ -15,7 +15,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-royal = "0.1.3"
+royal = "0.1.4"
 ```
 
 Example usage:
@@ -28,6 +28,21 @@ fn main() {
     
     if let Some(message) = Message::parse(input) {
         println!("Character: {}", message.header.character.unwrap_or_default());
+        println!("Content: {}", message.content);
+    }
+}
+```
+
+Parse a file:
+
+```rust
+use royal::Message;
+
+fn main() {
+    let messages = Message::parse_msg("test/test_data.msg");
+
+    for message in messages {
+        println!("Message ID: {}", message.header.message_id);
         println!("Content: {}", message.content);
     }
 }

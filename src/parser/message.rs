@@ -1,3 +1,5 @@
+use std::{fs::File, io::BufReader, io::BufRead};
+
 #[derive(Debug)]
 pub struct MessageHeader {
     pub box_type: BoxType,
@@ -159,5 +161,34 @@ impl Message {
         }
 
         (message.trim().to_string(), flags, confidant_points)
+    }
+
+    pub fn parse_msg(file_path: &str) -> Vec<Message> {
+        let mut messages = Vec::new();
+        
+        if let Ok(file) = File::open(file_path) {
+            let reader = BufReader::new(file);
+            let mut lines = reader.lines();
+            
+            while let Some(Ok(header_line)) = lines.next() {
+                if header_line.trim().is_empty() {
+                    continue;
+                }
+                
+                if let Some(Ok(content_line)) = lines.next() {
+                    let full_message = format!("{}{}", header_line, content_line);
+                    
+                    if let Some(message) = Self::parse(&full_message) {
+                        messages.push(message);
+                    } else {
+                        println!("Failed to parse message");
+                    }
+                }
+            }
+        } else {
+            println!("Failed to open file: {}", file_path);
+        }
+        
+        messages
     }
 }
