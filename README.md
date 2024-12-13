@@ -15,7 +15,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-royal = "0.1.4"
+royal = "0.1.5"
 ```
 
 Example usage:

@@ -1,8 +1,8 @@
 [package]
 name = "royal"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2021"
-description = "A parser for game dialogue message formats"
+description = "A parser for Persona 5 Royal dialogue message format"
 authors = ["emirsassan"]
 license = "GPL-3.0-or-later"
 readme = "README.md"

@@ -1,9 +1,22 @@
 use royal::Message;
 
 fn main() {
-    let input = "[msg PFM_BTTL_2 [Morgana]][s][f 4 10 65535 0 0][f 5 13 30 15 5]I cant see an exit we're stuck here[f 1 3 65535][w][e]";
+    parse_msg();
+    //parse_text();
+}
 
+fn parse_msg() {
     let messages = Message::parse_msg("test/test_data.msg");
+
+    for message in messages {
+        println!("Message ID: {}", message.header.message_id);
+        println!("Content: {}", message.content);
+    }
+}
+
+#[allow(dead_code)]
+fn parse_text() {
+    let input = "[msg PFM_BTTL_2 [Morgana]][s][f 4 10 65535 0 0][f 5 13 30 15 5]I cant see an exit we're stuck here[f 1 3 65535][w][e]";
 
     if let Some(message) = Message::parse(input) {
         println!("Message ID: {}", message.header.message_id);
@@ -19,10 +32,5 @@ fn main() {
         }
     } else {
         println!("Failed to parse message");
-    }
-
-    for message in messages {
-        println!("Message ID: {}", message.header.message_id);
-        println!("Content: {}", message.content);
     }
 }

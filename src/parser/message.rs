@@ -42,13 +42,17 @@ pub struct ConfidantPoints {
 
 impl Message {
     pub fn parse(input: &str) -> Option<Message> {
-        let parts: Vec<&str> = input.split(']').collect();
-        if parts.len() < 2 {
+        let mut parts = input.splitn(2, ']');
+        let header_part = parts.next()?;
+        let content_part = parts.next()?;
+
+        let header = Self::parse_header(header_part)?;
+        
+        if !content_part.contains("[s]") {
+            println!("Message missing [s] tag: {}", input);
             return None;
         }
 
-        let header = Self::parse_header(parts[0])?;
-        let content_part = &parts[1..].join("]");
         let (content, flags, confidant_points) = Self::parse_content(content_part);
 
         Some(Message {
@@ -102,22 +106,20 @@ impl Message {
         };
 
         let mut message = String::new();
-        let mut parts = content.split('[');
         let mut confidant_points: Option<ConfidantPoints> = None;
+        let mut parts = content.split('[').collect::<Vec<_>>();
 
-        if let Some(first) = parts.next() {
-            if first.starts_with(']') {
-                // skip leading ]
-            }
-        }
-
-        for part in parts {
+        for (i, part) in parts.iter().enumerate() {
             if part.is_empty() {
                 continue;
             }
 
             if part.starts_with('s') {
-                continue;
+                if let Some(text) = part.split(']').nth(1) {
+                    if !text.is_empty() {
+                        message.push_str(text);
+                    }
+                }
             } else if part.starts_with("f 4 10") {
                 flags.has_lipsync = true;
                 if let Some(text) = part.split(']').nth(1) {
@@ -127,8 +129,6 @@ impl Message {
                 flags.wait_for_input = true;
             } else if part.starts_with('e') {
                 break;
-            } else if !part.starts_with('f') {
-                message.push_str(part);
             } else if part.starts_with("f 5 13 ") {
                 confidant_points = {
                     let confidant_part = part.split(']').next().unwrap_or("");
@@ -146,15 +146,26 @@ impl Message {
                                 model_id: model_id as u16,
                             })
                         } else {
-                            println!("Failed to parse confidant points numbers: {:?}", parts);
                             None
                         }
                     } else {
-                        println!("Failed to parse confidant points: {:?}", parts);
                         None
                     }
                 };
                 if let Some(text) = part.split(']').nth(1) {
+                    message.push_str(text);
+                }
+            } else if part.starts_with('f') {
+                if let Some(text) = part.split(']').nth(1) {
+                    message.push_str(text);
+                }
+            } else {
+                let text = if part.contains(']') {
+                    part.split(']').nth(1).unwrap_or(part)
+                } else {
+                    part
+                };
+                if !text.is_empty() {
                     message.push_str(text);
                 }
             }
@@ -165,24 +176,36 @@ impl Message {
 
     pub fn parse_msg(file_path: &str) -> Vec<Message> {
         let mut messages = Vec::new();
+        let mut current_message = String::new();
         
         if let Ok(file) = File::open(file_path) {
             let reader = BufReader::new(file);
-            let mut lines = reader.lines();
             
-            while let Some(Ok(header_line)) = lines.next() {
-                if header_line.trim().is_empty() {
-                    continue;
-                }
-                
-                if let Some(Ok(content_line)) = lines.next() {
-                    let full_message = format!("{}{}", header_line, content_line);
+            for line in reader.lines() {
+                if let Ok(line) = line {
+                    let trimmed = line.trim();
                     
-                    if let Some(message) = Self::parse(&full_message) {
-                        messages.push(message);
-                    } else {
-                        println!("Failed to parse message");
+                    if trimmed.is_empty() || trimmed.starts_with("//") {
+                        continue;
                     }
+                    
+                    if trimmed.starts_with("[msg") {
+                        if !current_message.is_empty() {
+                            if let Some(message) = Self::parse(&current_message) {
+                                messages.push(message);
+                            }
+                            current_message.clear();
+                        }
+                        current_message.push_str(trimmed);
+                    } else {
+                        current_message.push_str(trimmed);
+                    }
+                }
+            }
+            
+            if !current_message.is_empty() {
+                if let Some(message) = Self::parse(&current_message) {
+                    messages.push(message);
                 }
             }
         } else {
